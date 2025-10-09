@@ -16,11 +16,22 @@ button.addEventListener("click", () => {
 });
 
 //make it go up on its ownnnn
-setInterval(() => {
-  counter++;
-  display.textContent = `${counter}mg of Caffine`;
-}, 1000);
+let lastTime: number = performance.now();
+
+function updateFrameTime(currentTime: number) {
+  const deltaTime = currentTime - lastTime; //time per frame
+  lastTime = currentTime;
+
+  const ammountPerSec = 1;
+  const increment = (deltaTime / 1000) * ammountPerSec;
+
+  counter += increment;
+  display.textContent = `${counter.toFixed()}mg of Caffine`;
+
+  requestAnimationFrame(updateFrameTime);
+}
 
 //Adds the button to the page
 document.body.appendChild(display);
+requestAnimationFrame(updateFrameTime);
 document.body.appendChild(button);
