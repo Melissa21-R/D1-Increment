@@ -5,14 +5,35 @@ button.innerHTML = "🍵";
 //Display for the counter
 const display = document.createElement("div");
 let counter: number = 0;
+let counterGrowth: number = 0;
 
 //Create the Base Text
 display.textContent = `${counter}mg of Caffine`;
 
+//make an update text function
+function updateDisplay() {
+  display.textContent = `${counter.toFixed()}mg of Caffine`;
+  buttonUp.disabled = counter < 10;
+}
+
 // add the clicking button event
 button.addEventListener("click", () => {
   counter += 1;
-  display.textContent = `${counter}mg of Caffine`;
+  updateDisplay();
+});
+
+//button upgrade set up
+const buttonUp = document.createElement("button");
+buttonUp.textContent = "Drink some Coffee (+1 Sec)";
+buttonUp.disabled = true;
+
+//button upgrade click
+buttonUp.addEventListener("click", () => {
+  if (counter >= 10) {
+    counter -= 10;
+    counterGrowth += 1;
+    updateDisplay();
+  }
 });
 
 //make it go up on its ownnnn
@@ -22,11 +43,10 @@ function updateFrameTime(currentTime: number) {
   const deltaTime = currentTime - lastTime; //time per frame
   lastTime = currentTime;
 
-  const ammountPerSec = 1;
-  const increment = (deltaTime / 1000) * ammountPerSec;
+  const increment = (deltaTime / 1000) * counterGrowth;
 
   counter += increment;
-  display.textContent = `${counter.toFixed()}mg of Caffine`;
+  updateDisplay();
 
   requestAnimationFrame(updateFrameTime);
 }
@@ -35,3 +55,4 @@ function updateFrameTime(currentTime: number) {
 document.body.appendChild(display);
 requestAnimationFrame(updateFrameTime);
 document.body.appendChild(button);
+document.body.appendChild(buttonUp);
