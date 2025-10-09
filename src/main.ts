@@ -15,6 +15,12 @@ button.addEventListener("click", () => {
   display.textContent = `${counter}mg of Caffine`;
 });
 
+//make it go up on its ownnnn
+setInterval(() => {
+  counter++;
+  display.textContent = `${counter}mg of Caffine`;
+}, 1000);
+
 //Adds the button to the page
 document.body.appendChild(display);
 document.body.appendChild(button);
