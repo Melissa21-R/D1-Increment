@@ -14,6 +14,9 @@ let counterGrowth: number = 0;
 let purchased1: number = 0;
 let purchased2: number = 0;
 let purchased3: number = 0;
+let greenTeaHireCost = 10;
+let oolongTeaHireCost = 100;
+let blackTeaHireCost = 1000;
 
 //Create the Base Text
 display.textContent = `${counter}mg of Caffine`;
@@ -27,15 +30,18 @@ function updateDisplay() {
 
   //normal update things
   display.textContent = `$${counter.toFixed(1)} made`;
-  buttonUp1.disabled = counter < 10;
-  buttonUp1.textContent =
-    `Hire Green Tea Brewers (Make $0.1 each cup) (Green Tea brewers hired: ${purchased1})`;
-  buttonUp2.disabled = counter < 100;
-  buttonUp2.textContent =
-    `Hire Oolong Tea Brewers (Make $2.00 each cup) (Oolong Tea brewers Hired: ${purchased2})`;
-  buttonUp3.disabled = counter < 1000;
-  buttonUp3.textContent =
-    `Hire Black Tea Brewers (Make $50.00 each cup) (Black Tea brewers Hired: ${purchased3})`;
+  buttonUp1.disabled = counter < greenTeaHireCost;
+  buttonUp1.textContent = `Hire Green Tea Brewers $${
+    greenTeaHireCost.toFixed(1)
+  } (Make $0.1 each cup) (Green Tea brewers hired: ${purchased1})`;
+  buttonUp2.disabled = counter < oolongTeaHireCost;
+  buttonUp2.textContent = `Hire Oolong Tea Brewers $${
+    oolongTeaHireCost.toFixed(1)
+  } (Make $2.00 each cup) (Oolong Tea brewers Hired: ${purchased2})`;
+  buttonUp3.disabled = counter < blackTeaHireCost;
+  buttonUp3.textContent = `Hire Black Tea Brewers $${
+    blackTeaHireCost.toFixed(1)
+  } (Make $50.00 each cup) (Black Tea brewers Hired: ${purchased3})`;
 }
 
 // add the clicking button event
@@ -70,8 +76,9 @@ buttonUp1.addEventListener("click", () => {
   }, 100);
 
   //increase counter auto
-  if (counter >= 10) {
-    counter -= 10;
+  if (counter >= greenTeaHireCost) {
+    counter -= greenTeaHireCost;
+    greenTeaHireCost *= 1.15;
     counterGrowth += 0.1;
     purchased1 += 1;
     updateDisplay();
@@ -97,8 +104,9 @@ buttonUp2.addEventListener("click", () => {
   }, 100);
 
   //increase counter auto
-  if (counter >= 100) {
-    counter -= 100;
+  if (counter >= oolongTeaHireCost) {
+    counter -= oolongTeaHireCost;
+    oolongTeaHireCost *= 1.15;
     counterGrowth += 2;
     purchased2 += 1;
     updateDisplay();
@@ -124,8 +132,9 @@ buttonUp3.addEventListener("click", () => {
   }, 100);
 
   //increase counter auto
-  if (counter >= 1000) {
-    counter -= 1000;
+  if (counter >= blackTeaHireCost) {
+    counter -= blackTeaHireCost;
+    blackTeaHireCost *= 1.15;
     counterGrowth += 50;
     purchased3 += 1;
     updateDisplay();
