@@ -1,6 +1,7 @@
 //Creates the Button
 const button = document.createElement("button");
-button.innerHTML = "Brew 🍵";
+let clickValue: number = 1;
+button.innerHTML = `Brew 🍵 (+${clickValue})`;
 
 //button juice
 // Style the main tea button
@@ -25,18 +26,6 @@ button.addEventListener("mouseover", () => {
 button.addEventListener("mouseout", () => {
   button.style.transform = "scale(1)";
   button.style.borderColor = "#a84444ff";
-});
-
-button.addEventListener("click", () => {
-  counter += 1;
-  updateDisplay();
-  spawnSteam(); // Visual feedback!
-
-  // Satisfying squish animation
-  button.style.transform = "scale(0.75)";
-  setTimeout(() => {
-    button.style.transform = "scale(1)";
-  }, 100);
 });
 
 //rest of button juice
@@ -110,6 +99,7 @@ interface Item {
     text: string;
     border: string;
   };
+  isMultiplier?: boolean;
 }
 
 const items: Item[] = [
@@ -150,7 +140,65 @@ const items: Item[] = [
       border: "#664d2eff",
     },
   },
+  {
+    name: "Stronger Brewing",
+    cost: 2000,
+    rate: 1,
+    purchased: 0,
+    description:
+      "Upgrades the players brewing ability, brewing more per click!",
+    colorTheme: {
+      bg: "#d891d2ff",
+      text: "#745d72ff",
+      border: "#581e54ff",
+    },
+  },
+  {
+    name: "Brewing Training",
+    cost: 5000,
+    rate: 1,
+    purchased: 0,
+    description:
+      "Trains all your brewers, they now produce better quality tea!",
+    colorTheme: {
+      bg: "#95cfc8ff",
+      text: "#577470ff",
+      border: "#2d4e4aff",
+    },
+    isMultiplier: false,
+  },
 ];
+
+//recalculate the growth for my modifiersss
+function recalculateCounterGrowth() {
+  const baseRates = [
+    { rate: 1, count: items[0].purchased },
+    { rate: 2, count: items[1].purchased },
+    { rate: 5, count: items[2].purchased },
+  ];
+  const brewingTraining = getItemByName("Brewing Training");
+  const multiplier = brewingTraining?.isMultiplier && brewingTraining.purchased
+    ? brewingTraining.purchased
+    : 0;
+
+  counterGrowth = 0;
+  baseRates.forEach(({ rate, count }) => {
+    const boostedRate = rate + multiplier;
+    counterGrowth += boostedRate * count;
+  });
+}
+
+//helper function to get the name
+const getItemByName = (name: string) =>
+  items.find((item) => item.name === name);
+
+//getting the new rate of an tea
+function getEffectiveRate(item: Item): number {
+  const baseRate = item.rate;
+  const brewingTraining = getItemByName("Brewing Training");
+  const trainingBonus = brewingTraining?.purchased || 0;
+  return baseRate + trainingBonus;
+}
 
 //this is the contaien to hold all the upgraded buttons
 const upgradesContainer = document.createElement("div");
@@ -168,9 +216,28 @@ items.forEach((item) => {
   styleUpgradeButton(upgradeButtons);
 
   function updateButton() {
-    upgradeButtons.textContent = `Hire ${item.name} ($${
-      item.cost.toFixed(1)
-    }) — Making $${item.rate}/cup (${item.purchased} hired)`;
+    const effectiveRate = getEffectiveRate(item);
+    let effectText: string;
+
+    if (item.name === "Brewing Training") {
+      const bonusPerLevel = 1; // Or = item.rate
+      const totalBonus = item.purchased * bonusPerLevel;
+      effectText = `Hire ${item.name} ($${
+        item.cost.toFixed(1)
+      }) +${totalBonus} profit/cup to all brewers (${item.purchased} hired)`;
+    } else if (item.name === "Stronger Brewing") {
+      const bonus = 1; // Or = item.rate
+      const totalB = item.purchased * bonus;
+      effectText = `${item.name} ($${
+        item.cost.toFixed(1)
+      }) +${totalB} profit/cup to you (${item.purchased} purcahsed)`;
+    } else {
+      effectText = `Hire ${item.name} ($${
+        item.cost.toFixed(1)
+      }) — Making $${effectiveRate}/cup (${item.purchased} hired)`;
+    }
+
+    upgradeButtons.textContent = `${effectText}`;
     upgradeButtons.style.backgroundColor = item.colorTheme.bg;
     upgradeButtons.style.color = item.colorTheme.text;
     upgradeButtons.style.borderColor = item.colorTheme.border;
@@ -185,22 +252,29 @@ items.forEach((item) => {
   upgradeButtons.addEventListener("mouseover", () => {
     if (!upgradeButtons.disabled) {
       upgradeButtons.style.transform = "scale(1.05)";
-      upgradeButtons.style.borderColor = "#708f6dff";
     }
   });
   upgradeButtons.addEventListener("mouseout", () => {
     upgradeButtons.style.transform = "scale(1)";
-    upgradeButtons.style.borderColor = "#85a382ff";
   });
 
   upgradeButtons.addEventListener("click", () => {
     if (counter >= item.cost) {
       counter -= item.cost;
       item.cost *= 1.15;
-      counterGrowth += item.rate;
       item.purchased++;
+      if (
+        item.name !== "Stronger Brewing" && item.name !== "Brewing Training"
+      ) {
+        recalculateCounterGrowth();
+      } else if (item.name === "Stronger Brewing") {
+        clickValue += item.rate;
+        button.innerHTML = `Brew 🍵 (+${clickValue})`;
+      }
+
       updateDisplay();
       updateButton();
+      updateFunctions.forEach((fn) => fn());
       spawnSteam();
       upgradeButtons.style.transform = "scale(0.75)";
       setTimeout(() => {
@@ -222,6 +296,18 @@ function updateDisplay() {
   display.textContent = `Tea Profits: $${counter.toFixed(1)}`;
   updateFunctions.forEach((updateFn) => updateFn());
 }
+
+button.addEventListener("click", () => {
+  counter += clickValue;
+  updateDisplay();
+  spawnSteam(); // Visual feedback!
+
+  // Satisfying squish animation
+  button.style.transform = "scale(0.75)";
+  setTimeout(() => {
+    button.style.transform = "scale(1)";
+  }, 100);
+});
 
 //make it go up on its ownnnn
 let lastTime: number = performance.now();
