@@ -27,6 +27,18 @@ button.addEventListener("mouseout", () => {
   button.style.borderColor = "#a84444ff";
 });
 
+button.addEventListener("click", () => {
+  counter += 1;
+  updateDisplay();
+  spawnSteam(); // Visual feedback!
+
+  // Satisfying squish animation
+  button.style.transform = "scale(0.75)";
+  setTimeout(() => {
+    button.style.transform = "scale(1)";
+  }, 100);
+});
+
 //rest of button juice
 // Style all upgrade buttons consistently
 const styleUpgradeButton = (btn: HTMLButtonElement) => {
@@ -85,198 +97,131 @@ let counter: number = 0;
 //initiate some variables
 let counterGrowth: number = 0;
 let teaAccumulator: number = 0;
-let purchased1: number = 0;
-let purchased2: number = 0;
-let purchased3: number = 0;
-let greenTeaHireCost = 10;
-let oolongTeaHireCost = 100;
-let blackTeaHireCost = 1000;
 
-//make an update text function
+//refractoring my buttons
+interface Item {
+  name: string;
+  cost: number;
+  rate: number;
+  purchased: number;
+  description: string;
+  colorTheme: {
+    bg: string;
+    text: string;
+    border: string;
+  };
+}
+
+const items: Item[] = [
+  {
+    name: "Green Tea Apprentice",
+    cost: 10,
+    rate: 1,
+    purchased: 0,
+    description: "Brews Green tea with fresh leaves. Steady and slow.",
+    colorTheme: {
+      bg: "#a9d4a5ff",
+      text: "#738871ff",
+      border: "#708f6dff",
+    },
+  },
+  {
+    name: "Oolong Tea Artisan",
+    cost: 100,
+    rate: 2,
+    purchased: 0,
+    description: "Makes Oolong tea with flare, quick and efficent.",
+    colorTheme: {
+      bg: "#ceb871ff",
+      text: "#837853ff",
+      border: "#77693aff",
+    },
+  },
+  {
+    name: "Black Tea Master",
+    cost: 500,
+    rate: 5,
+    purchased: 0,
+    description:
+      "Brews the best Black tea in the world, with quality and refinery",
+    colorTheme: {
+      bg: "#b89160ff",
+      text: "#705b42ff",
+      border: "#664d2eff",
+    },
+  },
+];
+
+//this is the contaien to hold all the upgraded buttons
+const upgradesContainer = document.createElement("div");
+upgradesContainer.style.display = "flex";
+upgradesContainer.style.flexDirection = "column";
+upgradesContainer.style.alignItems = "center";
+upgradesContainer.style.textAlign = "center";
+upgradesContainer.style.width = "100%";
+upgradesContainer.style.margin = "10px 0";
+
+const updateFunctions: (() => void)[] = [];
+
+items.forEach((item) => {
+  const upgradeButtons = document.createElement("button");
+  styleUpgradeButton(upgradeButtons);
+
+  function updateButton() {
+    upgradeButtons.textContent = `Hire ${item.name} ($${
+      item.cost.toFixed(1)
+    }) — Making $${item.rate}/cup (${item.purchased} hired)`;
+    upgradeButtons.style.backgroundColor = item.colorTheme.bg;
+    upgradeButtons.style.color = item.colorTheme.text;
+    upgradeButtons.style.borderColor = item.colorTheme.border;
+    upgradeButtons.disabled = counter < item.cost;
+    upgradeButtons.style.opacity = upgradeButtons.disabled ? "0.7" : "1.0";
+    upgradeButtons.style.cursor = upgradeButtons.disabled
+      ? "not-allowed"
+      : "pointer";
+  }
+  updateFunctions.push(updateButton);
+
+  upgradeButtons.addEventListener("mouseover", () => {
+    if (!upgradeButtons.disabled) {
+      upgradeButtons.style.transform = "scale(1.05)";
+      upgradeButtons.style.borderColor = "#708f6dff";
+    }
+  });
+  upgradeButtons.addEventListener("mouseout", () => {
+    upgradeButtons.style.transform = "scale(1)";
+    upgradeButtons.style.borderColor = "#85a382ff";
+  });
+
+  upgradeButtons.addEventListener("click", () => {
+    if (counter >= item.cost) {
+      counter -= item.cost;
+      item.cost *= 1.15;
+      counterGrowth += item.rate;
+      item.purchased++;
+      updateDisplay();
+      updateButton();
+      spawnSteam();
+      upgradeButtons.style.transform = "scale(0.75)";
+      setTimeout(() => {
+        upgradeButtons.style.transform = "scale(1)";
+      }, 100);
+    }
+  });
+
+  updateButton();
+  upgradesContainer.appendChild(upgradeButtons);
+});
+
 function updateDisplay() {
-  //juice for the display
   display.style.fontSize = "40px";
   display.style.color = "#421f0dff";
   display.style.fontFamily = "Comic Sans MS, cursive";
   display.style.margin = "10px 0";
 
-  //normal update things
   display.textContent = `Tea Profits: $${counter.toFixed(1)}`;
-  buttonUp1.disabled = counter < greenTeaHireCost;
-  buttonUp1.textContent = `Hire Green Tea Brewers $${
-    greenTeaHireCost.toFixed(1)
-  } (Make $0.1 each cup) (Green Tea brewers hired: ${purchased1})`;
-  buttonUp2.disabled = counter < oolongTeaHireCost;
-  buttonUp2.textContent = `Hire Oolong Tea Brewers $${
-    oolongTeaHireCost.toFixed(1)
-  } (Make $2.00 each cup) (Oolong Tea brewers hired: ${purchased2})`;
-  buttonUp3.disabled = counter < blackTeaHireCost;
-  buttonUp3.textContent = `Hire Black Tea Brewers $${
-    blackTeaHireCost.toFixed(1)
-  } (Make $50.00 each cup) (Black Tea brewers hired: ${purchased3})`;
-
-  //update button juice
-  if (counter < greenTeaHireCost) {
-    buttonUp1.style.cursor = "not-allowed";
-    buttonUp1.style.opacity = "0.7";
-  } else {
-    buttonUp1.style.cursor = "pointer";
-    buttonUp1.style.opacity = "1.0";
-  }
-
-  if (counter < oolongTeaHireCost) {
-    buttonUp2.style.cursor = "not-allowed";
-    buttonUp2.style.opacity = "0.7";
-  } else {
-    buttonUp2.style.cursor = "pointer";
-    buttonUp2.style.opacity = "1.0";
-  }
-
-  if (counter < blackTeaHireCost) {
-    buttonUp3.style.cursor = "not-allowed";
-    buttonUp3.style.opacity = "0.7";
-  } else {
-    buttonUp3.style.cursor = "pointer";
-    buttonUp3.style.opacity = "1.0";
-  }
+  updateFunctions.forEach((updateFn) => updateFn());
 }
-
-// add the clicking button event
-button.addEventListener("click", () => {
-  counter += 1;
-  updateDisplay();
-  spawnSteam();
-
-  //adding some juice when button pressed
-  button.style.transform = "scale(0.75)";
-  setTimeout(() => {
-    button.style.transform = "scale(1)";
-  }, 100);
-});
-
-//button 1 upgrade set up
-const buttonUp1 = document.createElement("button");
-buttonUp1.textContent = "Hire Green Tea Brewers (Make $0.1 each cup)";
-buttonUp1.disabled = true;
-
-//buttonUp1 juice
-
-buttonUp1.style.backgroundColor = "#a9d4a5ff"; // Soft rose (like tea steam)
-buttonUp1.style.color = "#738871ff"; // Rich dark brown — earthy tea vibe
-buttonUp1.style.border = "6px solid #708f6dff"; // Bronze outline — like a teapot rim
-styleUpgradeButton(buttonUp1);
-
-// Remove the old mouseover/out listeners first
-
-buttonUp1.addEventListener("mouseover", () => {
-  if (counter >= greenTeaHireCost) {
-    buttonUp1.style.transform = "scale(1.05)";
-    buttonUp1.style.borderColor = "#708f6dff";
-  }
-});
-
-buttonUp1.addEventListener("mouseout", () => {
-  buttonUp1.style.transform = "scale(1)";
-  buttonUp1.style.borderColor = "#85a382ff";
-});
-
-//button 1 upgrade click
-buttonUp1.addEventListener("click", () => {
-  //buttonUp1 juice click
-  buttonUp1.style.transform = "scale(0.75)";
-  setTimeout(() => {
-    buttonUp1.style.transform = "scale(1)";
-  }, 100);
-
-  //increase counter auto
-  if (counter >= greenTeaHireCost) {
-    counter -= greenTeaHireCost;
-    greenTeaHireCost *= 1.15;
-    counterGrowth += 0.1;
-    purchased1 += 1;
-    updateDisplay();
-  }
-});
-
-//button 2 upgrade set up
-const buttonUp2 = document.createElement("button");
-buttonUp2.textContent = "Hire Oolong Tea Brewers (Make $2.00 each cup)";
-buttonUp2.disabled = true;
-
-//buttonUp2 juice
-buttonUp2.style.backgroundColor = "#ceb871ff"; // Soft rose (like tea steam)
-buttonUp2.style.color = "#837853ff"; // Rich dark brown — earthy tea vibe
-buttonUp2.style.border = "6px solid #77693aff"; // Bronze outline — like a teapot rim
-styleUpgradeButton(buttonUp2);
-
-buttonUp2.addEventListener("mouseover", () => {
-  if (counter >= oolongTeaHireCost) {
-    buttonUp2.style.transform = "scale(1.05)";
-    buttonUp2.style.borderColor = "#77693aff";
-  }
-});
-
-buttonUp2.addEventListener("mouseout", () => {
-  buttonUp2.style.transform = "scale(1)";
-  buttonUp2.style.borderColor = "#918252ffff";
-});
-
-buttonUp2.addEventListener("click", () => {
-  //buttonUp2 juice click
-  buttonUp2.style.transform = "scale(0.75)";
-  setTimeout(() => {
-    buttonUp2.style.transform = "scale(1)";
-  }, 100);
-
-  //increase counter auto
-  if (counter >= oolongTeaHireCost) {
-    counter -= oolongTeaHireCost;
-    oolongTeaHireCost *= 1.15;
-    counterGrowth += 2;
-    purchased2 += 1;
-    updateDisplay();
-  }
-});
-
-//button 3 upgrade set up
-const buttonUp3 = document.createElement("button");
-buttonUp3.textContent = "Hire Black Tea Brewers (Make $50.00 each cup)";
-buttonUp3.disabled = true;
-
-//buttonUp3 juice
-buttonUp3.style.backgroundColor = "#b89160ff"; // Soft rose (like tea steam)
-buttonUp3.style.color = "#705b42ff"; // Rich dark brown — earthy tea vibe
-buttonUp3.style.border = "6px solid #664d2eff"; // Bronze outline — like a teapot rim
-styleUpgradeButton(buttonUp3);
-
-buttonUp3.addEventListener("mouseover", () => {
-  if (counter >= blackTeaHireCost) {
-    buttonUp3.style.transform = "scale(1.05)";
-    buttonUp3.style.borderColor = "#664d2eff";
-  }
-});
-
-buttonUp3.addEventListener("mouseout", () => {
-  buttonUp3.style.transform = "scale(1)";
-  buttonUp3.style.borderColor = "#796145ff";
-});
-
-buttonUp3.addEventListener("click", () => {
-  //buttonUp3 juice click
-  buttonUp3.style.transform = "scale(0.75)";
-  setTimeout(() => {
-    buttonUp3.style.transform = "scale(1)";
-  }, 100);
-
-  //increase counter auto
-  if (counter >= blackTeaHireCost) {
-    counter -= blackTeaHireCost;
-    blackTeaHireCost *= 1.15;
-    counterGrowth += 50;
-    purchased3 += 1;
-    updateDisplay();
-  }
-});
 
 //make it go up on its ownnnn
 let lastTime: number = performance.now();
@@ -312,6 +257,4 @@ document.body.style.backgroundColor = "#927465ff"; // Chocolate brown
 document.body.appendChild(display);
 requestAnimationFrame(updateFrameTime);
 document.body.appendChild(button);
-document.body.appendChild(buttonUp1);
-document.body.appendChild(buttonUp2);
-document.body.appendChild(buttonUp3);
+document.body.appendChild(upgradesContainer);
