@@ -1,8 +1,9 @@
-//Creates the Button
+//1. Creates the main Button
 const button = document.createElement("button");
 let clickValue: number = 1;
 button.innerHTML = `Brew 🍵 (+${clickValue})`;
 
+//2. all the initial juice, button juice, and background juice
 //button juice
 // Style the main tea button
 button.style.fontSize = "36px"; // Big, bold, beautiful
@@ -17,7 +18,16 @@ button.style.cursor = "pointer"; // Shows it's clickable
 button.style.fontFamily = "Comic Sans MS, cursive"; // Fun, handcrafted feel
 button.style.transition = "all 0.1s ease"; // Smooth for squish effect
 
-// Optional: Slightly larger on hover
+//Set the whole thing in the center
+document.body.style.display = "flex";
+document.body.style.flexDirection = "column";
+document.body.style.alignItems = "center";
+document.body.style.justifyContent = "center";
+document.body.style.height = "100vh";
+document.body.style.position = "relative";
+document.body.style.backgroundColor = "#927465ff"; // Chocolate brown
+
+//Slightly larger on hover
 button.addEventListener("mouseover", () => {
   button.style.transform = "scale(1.05)";
   button.style.borderColor = "#922d2dff"; // Warmer on hover
@@ -45,6 +55,8 @@ const styleUpgradeButton = (btn: HTMLButtonElement) => {
   btn.style.textAlign = "center";
 };
 
+//visual feedback: creates a rising steam particle when tea is brewed.
+//Enhances click satisfaction -- like a hit effect in a rhythm games
 //add some steam juice when tea is brewed
 function spawnSteam() {
   const steam = document.createElement("div");
@@ -57,7 +69,7 @@ function spawnSteam() {
   steam.style.pointerEvents = "none"; // No clicks
   steam.style.bottom = "60px"; // Rise from just above the floor
 
-  // 🌫️ Random horizontal position across screen width
+  // Random horizontal position across screen width
   const randomX = Math.random() * globalThis.innerWidth;
   steam.style.left = `${randomX}px`;
 
@@ -79,13 +91,23 @@ function spawnSteam() {
   document.body.appendChild(steam);
 }
 
+//this is the container to hold all the upgraded buttons
+const upgradesContainer = document.createElement("div");
+upgradesContainer.style.display = "flex";
+upgradesContainer.style.flexDirection = "column";
+upgradesContainer.style.alignItems = "center";
+upgradesContainer.style.textAlign = "center";
+upgradesContainer.style.width = "100%";
+upgradesContainer.style.margin = "10px 0";
+
+//3. initial variables and initial button varaibles (dom elements)
 //Display for the counter
 const display = document.createElement("div");
 let counter: number = 0;
 
 //initiate some variables
 let counterGrowth: number = 0;
-let teaAccumulator: number = 0;
+let autoClickerProgress: number = 0;
 
 //refractoring my buttons
 interface Item {
@@ -169,8 +191,11 @@ const items: Item[] = [
   },
 ];
 
+//4. All of the functions
+//updates the passive income rate based on owned upgrades
+//called whenever an upgrade is purchased to recalculate total output
 //recalculate the growth for my modifiersss
-function recalculateCounterGrowth() {
+function updateBrewerRates() {
   const baseRates = [
     { rate: 1, count: items[0].purchased },
     { rate: 2, count: items[1].purchased },
@@ -200,16 +225,40 @@ function getEffectiveRate(item: Item): number {
   return baseRate + trainingBonus;
 }
 
-//this is the contaien to hold all the upgraded buttons
-const upgradesContainer = document.createElement("div");
-upgradesContainer.style.display = "flex";
-upgradesContainer.style.flexDirection = "column";
-upgradesContainer.style.alignItems = "center";
-upgradesContainer.style.textAlign = "center";
-upgradesContainer.style.width = "100%";
-upgradesContainer.style.margin = "10px 0";
-
 const updateFunctions: (() => void)[] = [];
+
+function updateDisplay() {
+  display.style.fontSize = "40px";
+  display.style.color = "#421f0dff";
+  display.style.fontFamily = "Comic Sans MS, cursive";
+  display.style.margin = "10px 0";
+
+  display.textContent = `Tea Profits: $${counter.toFixed(1)}`;
+  updateFunctions.forEach((updateFn) => updateFn());
+}
+
+//make it go up on its ownnnn
+//Allows the counter to increment on its own
+//continues to increase the counter by a set amount adding to the old upgrade when another is purchased
+let lastTime: number = performance.now();
+
+function updateFrameTime(currentTime: number) {
+  const deltaTime = currentTime - lastTime; //time per frame
+  lastTime = currentTime;
+
+  const increment = (deltaTime / 1000) * counterGrowth;
+  counter += increment;
+  autoClickerProgress += increment;
+
+  while (autoClickerProgress >= 1) {
+    spawnSteam();
+    autoClickerProgress -= 1;
+    spawnSteam();
+  }
+  updateDisplay();
+
+  requestAnimationFrame(updateFrameTime);
+}
 
 items.forEach((item) => {
   const upgradeButtons = document.createElement("button");
@@ -249,6 +298,8 @@ items.forEach((item) => {
   }
   updateFunctions.push(updateButton);
 
+  //5. all of the event listeners
+
   upgradeButtons.addEventListener("mouseover", () => {
     if (!upgradeButtons.disabled) {
       upgradeButtons.style.transform = "scale(1.05)";
@@ -266,7 +317,7 @@ items.forEach((item) => {
       if (
         item.name !== "Stronger Brewing" && item.name !== "Brewing Training"
       ) {
-        recalculateCounterGrowth();
+        updateBrewerRates();
       } else if (item.name === "Stronger Brewing") {
         clickValue += item.rate;
         button.innerHTML = `Brew 🍵 (+${clickValue})`;
@@ -287,16 +338,6 @@ items.forEach((item) => {
   upgradesContainer.appendChild(upgradeButtons);
 });
 
-function updateDisplay() {
-  display.style.fontSize = "40px";
-  display.style.color = "#421f0dff";
-  display.style.fontFamily = "Comic Sans MS, cursive";
-  display.style.margin = "10px 0";
-
-  display.textContent = `Tea Profits: $${counter.toFixed(1)}`;
-  updateFunctions.forEach((updateFn) => updateFn());
-}
-
 button.addEventListener("click", () => {
   counter += clickValue;
   updateDisplay();
@@ -309,35 +350,7 @@ button.addEventListener("click", () => {
   }, 100);
 });
 
-//make it go up on its ownnnn
-let lastTime: number = performance.now();
-
-function updateFrameTime(currentTime: number) {
-  const deltaTime = currentTime - lastTime; //time per frame
-  lastTime = currentTime;
-
-  const increment = (deltaTime / 1000) * counterGrowth;
-  counter += increment;
-  teaAccumulator += increment;
-
-  while (teaAccumulator >= 1) {
-    spawnSteam();
-    teaAccumulator -= 1;
-    spawnSteam();
-  }
-  updateDisplay();
-
-  requestAnimationFrame(updateFrameTime);
-}
-
-//Set the whole thing in the center
-document.body.style.display = "flex";
-document.body.style.flexDirection = "column";
-document.body.style.alignItems = "center";
-document.body.style.justifyContent = "center";
-document.body.style.height = "100vh";
-document.body.style.position = "relative";
-document.body.style.backgroundColor = "#927465ff"; // Chocolate brown
+//6. initial UI set up
 
 //Adds the button to the page
 document.body.appendChild(display);
