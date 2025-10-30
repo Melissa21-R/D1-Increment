@@ -1,4 +1,5 @@
 import brewingSound from "./audio/bubble-in-water-422579.mp3";
+import teaMug from "./images/Teamug.png";
 
 const brewSound = new Audio(brewingSound);
 brewSound.volume = 0.3;
@@ -6,7 +7,28 @@ brewSound.volume = 0.3;
 //1. Creates the main Button
 const button = document.createElement("button");
 let clickValue: number = 1;
-button.innerHTML = `Brew 🍵 (+${clickValue})`;
+
+//changed my main button into a large tea pixel art image I made inspired by t4ylo's bee honey clicker
+const mugImage = document.createElement("img");
+mugImage.src = teaMug;
+mugImage.alt = "Tea Mug";
+mugImage.style.width = "80%";
+mugImage.style.height = "auto";
+mugImage.style.display = "block";
+mugImage.style.margin = "0 auto";
+mugImage.style.pointerEvents = "none";
+mugImage.style.imageRendering = "pixelated";
+
+button.appendChild(mugImage);
+
+const valueLabel = document.createElement("div");
+valueLabel.textContent = `+${clickValue}`;
+valueLabel.style.color = "#694545ff";
+valueLabel.style.fontSize = "30px";
+valueLabel.style.fontFamily = "Comic Sans MS, cursive";
+valueLabel.style.marginTop = "-5px";
+valueLabel.style.pointerEvents = "none";
+button.appendChild(valueLabel);
 
 //2. all the initial juice, button juice, and background juice
 //button juice
@@ -14,11 +36,10 @@ button.innerHTML = `Brew 🍵 (+${clickValue})`;
 button.style.fontSize = "36px"; // Big, bold, beautiful
 button.style.margin = "14px 0";
 button.style.padding = "20px 40px"; // Generous padding — feels tappable
-button.style.backgroundColor = "#D4A5A5"; // Soft rose (like tea steam)
+button.style.backgroundColor = "#D4A5A500"; // Soft rose (like tea steam)
 button.style.color = "#694545ff"; // Rich dark brown — earthy tea vibe
-button.style.border = "6px solid #922d2dff"; // Bronze outline — like a teapot rim
+button.style.border = "6px solid #922d2d00"; // Bronze outline — like a teapot rim
 button.style.borderRadius = "50px"; // Super rounded (pill-shaped)
-button.style.boxShadow = "0 6px 12px rgba(0,0,0,0.2)"; // Soft depth
 button.style.cursor = "pointer"; // Shows it's clickable
 button.style.fontFamily = "Comic Sans MS, cursive"; // Fun, handcrafted feel
 button.style.transition = "all 0.1s ease"; // Smooth for squish effect
@@ -35,12 +56,12 @@ document.body.style.backgroundColor = "#927465ff"; // Chocolate brown
 //Slightly larger on hover
 button.addEventListener("mouseover", () => {
   button.style.transform = "scale(1.05)";
-  button.style.borderColor = "#922d2dff"; // Warmer on hover
+  button.style.borderColor = "#922d2d00"; // Warmer on hover
 });
 
 button.addEventListener("mouseout", () => {
   button.style.transform = "scale(1)";
-  button.style.borderColor = "#a84444ff";
+  button.style.borderColor = "#a8444400";
 });
 
 //rest of button juice
