@@ -1,3 +1,8 @@
+import brewingSound from "./audio/bubble-in-water-422579.mp3";
+
+const brewSound = new Audio(brewingSound);
+brewSound.volume = 0.3;
+
 //1. Creates the main Button
 const button = document.createElement("button");
 let clickValue: number = 1;
@@ -342,6 +347,13 @@ button.addEventListener("click", () => {
   counter += clickValue;
   updateDisplay();
   spawnSteam(); // Visual feedback!
+
+  //New sound effect when you brew idea from: adegan1 (Frog Frenzy)
+  brewSound.play();
+  setTimeout(() => {
+    brewSound.pause();
+    brewSound.currentTime = 0;
+  }, 700);
 
   // Satisfying squish animation
   button.style.transform = "scale(0.75)";

@@ -1,3 +1,7 @@
 # CMPM 121 D1 Project
 
-This is the starting point for your CMPM 121 D1 project. The goal of this project is to create a simple web application using TypeScript, Vite, and modern web development practices. Students should make sure to remove _this_ content from their README.md file and replace it with their own project documentation.
+Student: Melissa Rosales Class: CMPM 121 Quarter: Fall 2025
+
+I made an incremental game revolved around brewing cups of tea. The player clicks the brew button in order to make cups of tea sell them and make money. That money can then be used to buy more brewers and make more different kinds of tea, as well as improve your brewing quality.
+
+Change 1: Inspired by audio tracks from Andrew Degan "Frog Frenzy" https://github.com/adegan1/cmpm121-incremental-andrewdegan I updated the Ui to have an on click bubble sound to fit with the brewing theme. My changes happened in my main.ts in order to impliment the audio and then on line 352-356 I played the audio on brew click!
